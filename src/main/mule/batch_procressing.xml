@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="972bf53c-8731-4fea-b7e8-e1cc5a4d908b" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="7060392d-1da8-47c4-bafb-1e46c1e97da5" >
+		<file:connection workingDir="C:\Users\91944\Downloads\read file" />
+	</file:config>
+	<flow name="batch_procressingFlow2" doc:id="d206d7d4-53f8-48d1-8cae-079cb48ba665" >
+		<http:listener doc:name="Listener" doc:id="d72e684e-81d8-4d65-a638-6666ec52a92b" config-ref="HTTP_Listener_config" path="csv" />
+		<file:read doc:name="Read" doc:id="475ec9b1-c819-4e4b-b915-a3572412649d" config-ref="File_Config" path="C:\Users\91944\Downloads\read file\customers-1000.csv" />
+		<batch:job jobName="batch_procressingBatch_Job1" doc:id="56498c30-6dac-4ef2-9ca3-5656a40de9e6" >
+			<batch:process-records >
+				<batch:step name="Batch_Step2" doc:id="63d94964-50f2-4407-b407-f3bdab093ea6" >
+					<ee:transform doc:name="Transform Message" doc:id="f1412a36-b8e0-4a5a-9264-283ff80a2306">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				</batch:step>
+				<batch:step name="Batch_Step3" doc:id="98af2b4d-334e-4e69-9a7d-c70865a0509b" />
+			</batch:process-records>
+		</batch:job>
+	</flow>
+	<flow name="batch_procressingFlow" doc:id="2d757538-4f88-4a81-bc87-3f10f4911fbe" >
+		<http:listener doc:name="Listener" doc:id="f6e17897-1d8d-46ff-9cdb-991eaf45b7f9" config-ref="HTTP_Listener_config" path="bp"/>
+		<set-payload value='#[[10,20,30,"a","b",40,"c",50,60,70,80]]' doc:name='[10,20,30,"a","b",40,"c",50,60,70,80]' doc:id="e01eb569-c1dc-48aa-b859-ee029cd89613" />
+		<batch:job jobName="batch_procressingBatch_Job" doc:id="2ad55560-5f81-4698-bffb-d379048e1f63" blockSize="4">
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="4ca55bb7-9af7-49fd-89bf-3688afe35553">
+					<choice doc:name="Choice" doc:id="54cb6e92-c600-4751-808f-c1a0b54c60d5" >
+						<when expression="#[payload is Number]">
+							<set-payload value="#[payload * 10]" doc:name="payload * 10" doc:id="9fa2ba1e-83ec-4f99-b47d-74e4ad5e2f9a" />
+						</when>
+						<otherwise>
+							<logger level="INFO" doc:name="Logger" doc:id="b69404f5-81cd-4ed7-9611-2ee91bd2c13a" message="#['Invalid record: ' ++ (payload as String)]"/>
+						</otherwise>
+					</choice>
+				</batch:step>
+				<batch:step name="Batch_Step1" doc:id="12636e34-070b-43f8-8234-d871e6c8bd50" acceptPolicy="ONLY_FAILURES">
+					<set-payload value="#[payload]" doc:name="payload " doc:id="85368c2d-c2aa-45ab-9902-2d18527bb6f3" />
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<logger level="INFO" doc:name="Logger" doc:id="04afb804-8bca-4f36-ad1b-ae306462d996" message="#[payload]"/>
+			</batch:on-complete>
+		</batch:job>
+	</flow>
+</mule>
