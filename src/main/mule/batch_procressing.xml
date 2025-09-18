@@ -18,7 +18,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 	</file:config>
 	<flow name="batch_procressingFlow2" doc:id="d206d7d4-53f8-48d1-8cae-079cb48ba665" >
 		<http:listener doc:name="Listener" doc:id="d72e684e-81d8-4d65-a638-6666ec52a92b" config-ref="HTTP_Listener_config" path="csv" />
-		<file:read doc:name="Read" doc:id="475ec9b1-c819-4e4b-b915-a3572412649d" config-ref="File_Config" path="C:\Users\91944\Downloads\read file\customers-1000.csv" />
+		<file:read doc:name="Rec-csv" doc:id="475ec9b1-c819-4e4b-b915-a3572412649d" config-ref="File_Config" path="C:\Users\91944\Downloads\read file\customers-1000.csv" />
 		<batch:job jobName="batch_procressingBatch_Job1" doc:id="56498c30-6dac-4ef2-9ca3-5656a40de9e6" >
 			<batch:process-records >
 				<batch:step name="Batch_Step2" doc:id="63d94964-50f2-4407-b407-f3bdab093ea6" >
@@ -33,6 +33,9 @@ payload]]></ee:set-payload>
 				</batch:step>
 				<batch:step name="Batch_Step3" doc:id="98af2b4d-334e-4e69-9a7d-c70865a0509b" />
 			</batch:process-records>
+			<batch:on-complete >
+				<logger level="INFO" doc:name="Logger" doc:id="c6e817be-c5ba-4d59-a6b1-6ab499e8f440" message="#[payload]"/>
+			</batch:on-complete>
 		</batch:job>
 	</flow>
 	<flow name="batch_procressingFlow" doc:id="2d757538-4f88-4a81-bc87-3f10f4911fbe" >
